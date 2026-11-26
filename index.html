@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLANIFY 5.0</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 25px;
+    background: #090b12;
+    color: #f1f2ff;
+    font-family: Arial, sans-serif;
+}
+
+.container { max-width: 1250px; margin: auto; }
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+h1 { color: #8985ff; font-size: 36px; margin: 0; }
+h2 { margin-top: 0; }
+
+.panel {
+    background: #141724;
+    border: 1px solid #292d42;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 22px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 14px;
+    background: #171b2b;
+    border: 1px solid #30344d;
+}
+
+.stat-card p { color: #a5a8bd; margin: 0 0 10px; }
+.stat-card strong { font-size: 32px; }
+.purple strong { color: #9691ff; }
+.green strong { color: #53d69a; }
+.orange strong { color: #ffb65c; }
+
+input, select, button {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #343951;
+    background: #202437;
+    color: white;
+    font-size: 15px;
+}
+
+input, select { width: 100%; }
+
+button {
+    cursor: pointer;
+    background: #7772ed;
+    border: none;
+}
+
+button:hover { background: #625de0; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.form-grid button { grid-column: 1 / -1; }
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field label {
+    color: #aaa8c4;
+    font-size: 13px;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.navigation h2 { margin: 0; text-align: center; }
+
+.view-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.view-buttons button.active {
+    background: #aaa6ff;
+    color: #111322;
+    font-weight: bold;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.weekday {
+    text-align: center;
+    color: #aaa8ff;
+    font-weight: bold;
+    padding: 10px 2px;
+}
+
+.calendar-day {
+    min-height: 105px;
+    padding: 10px;
+    background: #10121a;
+    border: 1px solid #282a38;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.calendar-day:hover {
+    border-color: #8885ff;
+    background: #20203b;
+}
+
+.calendar-day.today { border: 2px solid #8885ff; }
+.calendar-day.selected { background: #252545; border: 2px solid #aaa6ff; }
+.calendar-day.other-month { opacity: 0.35; }
+
+.day-number { font-weight: bold; margin-bottom: 8px; }
+.event-dot {
+    height: 7px;
+    width: 7px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #8885ff;
+    margin-right: 3px;
+}
+
+.event-count { font-size: 11px; color: #aaa8ff; }
+
+#weekView, #monthView, #dayView { display: none; }
+#weekView.visible, #monthView.visible, #dayView.visible { display: block; }
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.week-day {
+    min-height: 180px;
+    padding: 12px 9px;
+    background: #10121a;
+    border: 1px solid #282a38;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.week-day:hover { border-color: #8885ff; }
+.week-day.selected { border: 2px solid #aaa6ff; }
+.week-day.today { background: #1b1b35; }
+
+.day-name { color: #aaa8ff; font-weight: bold; margin-bottom: 8px; }
+.day-date { color: #aaa; font-size: 13px; margin-bottom: 12px; }
+
+.appointment {
+    background: #29294c;
+    border-left: 3px solid #8885ff;
+    padding: 8px;
+    margin-top: 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.appointment.done { opacity: 0.5; text-decoration: line-through; }
+
+.appointment button {
+    font-size: 11px;
+    padding: 6px;
+    margin-top: 6px;
+    margin-right: 3px;
+}
+
+.delete-button { background: #a83d55; }
+
+.empty { color: #85899d; font-size: 13px; }
+
+.timeline-hour {
+    display: grid;
+    grid-template-columns: 65px 1fr;
+    min-height: 65px;
+    border-top: 1px solid #292d42;
+}
+
+.timeline-time { color: #aaa8ff; padding: 12px 5px; font-size: 13px; }
+.timeline-content { padding: 5px 10px; border-left: 1px solid #343951; }
+
+.day-event {
+    background: #29294c;
+    border-left: 3px solid #8885ff;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+}
+
+.day-event p { color: #bbb; margin-bottom: 0; }
+
+@media (max-width: 850px) {
+    .week-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 550px) {
+    body { padding: 12px; }
+    .stats { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid button { grid-column: auto; }
+    .week-grid { grid-template-columns: 1fr; }
+    .calendar { gap: 3px; }
+    .calendar-day { padding: 5px; min-height: 65px; }
+    .weekday { font-size: 11px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+    <h1>PLANIFY</h1>
+    <span style="color:#9295aa;">Deine Woche. Dein Überblick.</span>
+</header>
+
+<section class="stats">
+    <div class="stat-card purple">
+        <p>Alle Termine</p>
+        <strong id="totalAppointments">0</strong>
+    </div>
+    <div class="stat-card green">
+        <p>Erledigt</p>
+        <strong id="completedAppointments">0</strong>
+    </div>
+    <div class="stat-card orange">
+        <p>Noch offen</p>
+        <strong id="openAppointments">0</strong>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Neuen Termin erstellen</h2>
+
+    <form id="appointmentForm" class="form-grid">
+        <div class="field">
+            <label for="title">Terminname</label>
+            <input type="text" id="title" placeholder="Was steht an?" required>
+        </div>
+
+        <div class="field">
+            <label for="date">Datum</label>
+            <input type="date" id="date" required>
+        </div>
+
+        <div class="field">
+            <label for="start">Startzeit</label>
+            <input type="time" id="start" required>
+        </div>
+
+        <div class="field">
+            <label for="end">Endzeit</label>
+            <input type="time" id="end" required>
+        </div>
+
+        <div class="field">
+            <label for="reminder">Erinnerung</label>
+            <select id="reminder">
+                <option value="-1">Keine Erinnerung</option>
+                <option value="0">Genau zum Termin</option>
+                <option value="5">5 Minuten vorher</option>
+                <option value="10">10 Minuten vorher</option>
+                <option value="15">15 Minuten vorher</option>
+                <option value="30">30 Minuten vorher</option>
+                <option value="60">1 Stunde vorher</option>
+                <option value="120">2 Stunden vorher</option>
+            </select>
+        </div>
+
+        <button type="submit">+ Termin hinzufügen</button>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="view-buttons">
+        <button id="weekButton" class="active" onclick="setView('week')">Woche</button>
+        <button id="monthButton" onclick="setView('month')">Monat</button>
+    </div>
+
+    <div class="navigation">
+        <button onclick="navigate(-1)">← Zurück</button>
+        <h2 id="calendarTitle">Kalender</h2>
+        <button onclick="navigate(1)">Weiter →</button>
+    </div>
+
+    <div id="weekView" class="visible">
+        <div class="week-grid" id="weekGrid"></div>
+    </div>
+
+    <div id="monthView">
+        <div class="calendar" id="monthGrid"></div>
+    </div>
+</section>
+
+<section class="panel" id="dayView">
+    <h2 id="dayTitle">Mein Tageskalender</h2>
+    <div id="dayTimeline"></div>
+</section>
+
+</div>
+
+<script>
+let appointments = JSON.parse(
+    localStorage.getItem("planifyAppointments") || "[]"
+);
+
+let currentWeek = new Date();
+let currentMonth = new Date();
+let selectedDate = null;
+let currentView = "week";
+
+function save() {
+    localStorage.setItem(
+        "planifyAppointments",
+        JSON.stringify(appointments)
+    );
+}
+
+function dateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function mondayOfWeek(date) {
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
+    const day = (result.getDay() + 6) % 7;
+    result.setDate(result.getDate() - day);
+    return result;
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+function updateStats() {
+    const total = appointments.length;
+    const completed = appointments.filter(a => a.done).length;
+
+    document.getElementById("totalAppointments").textContent = total;
+    document.getElementById("completedAppointments").textContent = completed;
+    document.getElementById("openAppointments").textContent = total - completed;
+}
+
+function setView(view) {
+    currentView = view;
+
+    document.getElementById("weekView").classList.toggle("visible", view === "week");
+    document.getElementById("monthView").classList.toggle("visible", view === "month");
+
+    document.getElementById("weekButton").classList.toggle("active", view === "week");
+    document.getElementById("monthButton").classList.toggle("active", view === "month");
+
+    selectedDate = null;
+    document.getElementById("dayView").classList.remove("visible");
+
+    render();
+}
+
+function navigate(direction) {
+    if (currentView === "week") {
+        currentWeek.setDate(currentWeek.getDate() + direction * 7);
+    } else {
+        currentMonth.setDate(1);
+        currentMonth.setMonth(currentMonth.getMonth() + direction);
+    }
+    render();
+}
+
+function render() {
+    updateStats();
+
+    if (currentView === "week") {
+        renderWeek();
+    } else {
+        renderMonth();
+    }
+}
+
+function appointmentCard(a) {
+    return `
+        <div class="appointment ${a.done ? "done" : ""}">
+            <strong>${escapeHTML(a.title)}</strong><br>
+            ${escapeHTML(a.start)} – ${escapeHTML(a.end)} Uhr<br>
+            <button onclick="toggleAppointment('${a.id}'); event.stopPropagation();">
+                ${a.done ? "Wieder öffnen" : "Erledigt"}
+            </button>
+            <button class="delete-button"
+                onclick="deleteAppointment('${a.id}'); event.stopPropagation();">
+                Löschen
+            </button>
+        </div>
+    `;
+}
+
+function renderWeek() {
+    const grid = document.getElementById("weekGrid");
+    grid.innerHTML = "";
+
+    const monday = mondayOfWeek(currentWeek);
+    const today = dateString(new Date());
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    document.getElementById("calendarTitle").textContent =
+        monday.toLocaleDateString("de-DE", {day:"numeric", month:"long"}) +
+        " – " +
+        sunday.toLocaleDateString("de-DE", {
+            day:"numeric", month:"long", year:"numeric"
+        });
+
+    const names = [
+        "Montag", "Dienstag", "Mittwoch",
+        "Donnerstag", "Freitag", "Samstag", "Sonntag"
+    ];
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const value = dateString(date);
+
+        const dayAppointments = appointments.filter(a => a.date === value);
+        let html = "";
+
+        dayAppointments.forEach(a => html += appointmentCard(a));
+
+        const element = document.createElement("div");
+        element.className = "week-day";
+
+        if (value === today) element.classList.add("today");
+        if (value === selectedDate) element.classList.add("selected");
+
+        element.innerHTML = `
+            <div class="day-name">${names[i]}</div>
+            <div class="day-date">${date.toLocaleDateString("de-DE")}</div>
+            ${html || '<div class="empty">Keine Termine</div>'}
+        `;
+
+        element.addEventListener("click", () => showDayTimeline(value));
+        grid.appendChild(element);
+    }
+}
+
+function renderMonth() {
+    const grid = document.getElementById("monthGrid");
+    grid.innerHTML = "";
+
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+
+    document.getElementById("calendarTitle").textContent =
+        currentMonth.toLocaleDateString("de-DE", {
+            month: "long", year: "numeric"
+        });
+
+    ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].forEach(name => {
+        const element = document.createElement("div");
+        element.className = "weekday";
+        element.textContent = name;
+        grid.appendChild(element);
+    });
+
+    const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const previousMonthDays = new Date(year, month, 0).getDate();
+    const today = dateString(new Date());
+
+    for (let i = 0; i < 42; i++) {
+        let date;
+        let otherMonth = false;
+
+        if (i < offset) {
+            date = new Date(year, month - 1, previousMonthDays - offset + i + 1);
+            otherMonth = true;
+        } else if (i >= offset + daysInMonth) {
+            date = new Date(year, month + 1, i - offset - daysInMonth + 1);
+            otherMonth = true;
+        } else {
+            date = new Date(year, month, i - offset + 1);
+        }
+
+        const value = dateString(date);
+        const dayAppointments = appointments.filter(a => a.date === value);
+
+        const element = document.createElement("div");
+        element.className = "calendar-day";
+
+        if (otherMonth) element.classList.add("other-month");
+        if (value === today) element.classList.add("today");
+        if (value === selectedDate) element.classList.add("selected");
+
+        element.innerHTML = `
+            <div class="day-number">${date.getDate()}</div>
+            ${dayAppointments.length
+                ? `<span class="event-dot"></span>
+                   <span class="event-count">${dayAppointments.length} Termin(e)</span>`
+                : ""}
+        `;
+
+        element.addEventListener("click", () => showDayTimeline(value));
+        grid.appendChild(element);
+    }
+}
+
+function showDayTimeline(date) {
+    selectedDate = date;
+
+    const dayView = document.getElementById("dayView");
+    const timeline = document.getElementById("dayTimeline");
+
+    dayView.classList.add("visible");
+    timeline.innerHTML = "";
+
+    const selected = new Date(date + "T12:00:00");
+
+    document.getElementById("dayTitle").textContent =
+        selected.toLocaleDateString("de-DE", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
+
+    for (let hour = 0; hour < 24; hour++) {
+        const time = String(hour).padStart(2, "0") + ":00";
+
+        const events = appointments.filter(a =>
+            a.date === date &&
+            Number(a.start.split(":")[0]) === hour
+        );
+
+        let eventHTML = "";
+
+        events.forEach(a => {
+            eventHTML += `
+                <div class="day-event">
+                    <strong>${escapeHTML(a.title)}</strong>
+                    <p>${escapeHTML(a.start)} – ${escapeHTML(a.end)} Uhr</p>
+                    ${a.reminderMinutes != null && a.reminderMinutes >= 0
+                        ? `<p>Erinnerung: ${a.reminderMinutes === 0
+                            ? "Zum Termin"
+                            : a.reminderMinutes + " Minuten vorher"}</p>`
+                        : ""}
+                </div>
+            `;
+        });
+
+        timeline.innerHTML += `
+            <div class="timeline-hour">
+                <div class="timeline-time">${time}</div>
+                <div class="timeline-content">${eventHTML}</div>
+            </div>
+        `;
+    }
+
+    render();
+}
+
+document.getElementById("appointmentForm")
+.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const title = document.getElementById("title").value.trim();
+    const date = document.getElementById("date").value;
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+    const reminderMinutes = Number(document.getElementById("reminder").value);
+
+    if (!title || !date || !start || !end) return;
+
+    if (end <= start) {
+        alert("Die Endzeit muss nach der Startzeit liegen.");
+        return;
+    }
+
+    if (reminderMinutes >= 0) {
+        if (!("Notification" in window)) {
+            alert("Dein Browser unterstützt keine Benachrichtigungen. Der Termin wird ohne Erinnerung gespeichert.");
+        } else if (Notification.permission === "default") {
+            await Notification.requestPermission();
+        }
+
+        if ("Notification" in window &&
+            Notification.permission !== "granted") {
+            alert("Benachrichtigungen sind nicht erlaubt. Der Termin wird ohne aktive Erinnerung gespeichert.");
+        }
+    }
+
+    appointments.push({
+        id: String(Date.now()) + Math.random().toString(16).slice(2),
+        title,
+        date,
+        start,
+        end,
+        done: false,
+        reminderMinutes:
+            reminderMinutes >= 0 && "Notification" in window &&
+            Notification.permission === "granted"
+                ? reminderMinutes
+                : -1,
+        notified: false
+    });
+
+    save();
+    this.reset();
+
+    document.getElementById("date").value = dateString(new Date());
+
+    render();
+
+    if (selectedDate === date) showDayTimeline(date);
+});
+
+function toggleAppointment(id) {
+    const appointment = appointments.find(a => a.id === id);
+    if (!appointment) return;
+
+    appointment.done = !appointment.done;
+    save();
+    render();
+
+    if (selectedDate) showDayTimeline(selectedDate);
+}
+
+function deleteAppointment(id) {
+    appointments = appointments.filter(a => a.id !== id);
+    save();
+    render();
+
+    if (selectedDate) showDayTimeline(selectedDate);
+}
+
+function checkReminders() {
+    if (!("Notification" in window) ||
+        Notification.permission !== "granted") return;
+
+    const now = new Date();
+
+    appointments.forEach(a => {
+        if (a.done || a.reminderMinutes == null ||
+            a.reminderMinutes < 0 || a.notified) return;
+
+        const [year, month, day] = a.date.split("-").map(Number);
+        const [hours, minutes] = a.start.split(":").map(Number);
+
+        const appointmentTime = new Date(
+            year, month - 1, day, hours, minutes, 0, 0
+        );
+
+        const reminderTime = new Date(
+            appointmentTime.getTime() - a.reminderMinutes * 60000
+        );
+
+        if (now >= reminderTime && now < appointmentTime) {
+            new Notification("PLANIFY – Terminerinnerung", {
+                body: a.title + " beginnt um " + a.start + " Uhr."
+            });
+
+            a.notified = true;
+            save();
+        } else if (a.reminderMinutes === 0 &&
+                   now >= appointmentTime &&
+                   now.getTime() - appointmentTime.getTime() < 30000) {
+            new Notification("PLANIFY – Termin beginnt jetzt", {
+                body: a.title
+            });
+
+            a.notified = true;
+            save();
+        }
+    });
+}
+
+document.getElementById("date").value = dateString(new Date());
+
+render();
+checkReminders();
+setInterval(checkReminders, 15000);
+</script>
+
+</body>
+</html>
